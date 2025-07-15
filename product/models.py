@@ -11,7 +11,7 @@ class Category(models.Model):
         return self.products.count()
 
 
-
+ 
 class Product(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)

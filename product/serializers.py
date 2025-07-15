@@ -6,7 +6,7 @@ class CategoryDetailSerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
-
+ 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model =Category
@@ -23,7 +23,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model =Product
-        fields = 'title price category'.split()
+        fields = 'id title price category'.split()
 
 
 
@@ -36,7 +36,7 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model =Review
-        fields = 'text product stars'.split()
+        fields = 'id text product stars'.split()
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
