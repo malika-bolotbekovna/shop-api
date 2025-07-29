@@ -74,10 +74,6 @@ class CategoryDetailAPIView(ExceptionHandledAPIView, RetrieveUpdateDestroyAPIVie
         except Category.DoesNotExist:
             raise Http404(f'Category with id={category_id} does not exist!')
     
-    def handle_exception(self, exc):
-        if isinstance(exc, Http404):
-            return Response({'error':str(exc)}, status=status.HTTP_404_NOT_FOUND)
-        return super().handle_exception(exc)
     
     def put(self, request, *args, **kwargs):
         serializer = CategoryValidateSerializer(data=request.data)
