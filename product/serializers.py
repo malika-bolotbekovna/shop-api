@@ -5,13 +5,13 @@ from rest_framework.exceptions import ValidationError
 class CategoryDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = 'id name product_count'.split()
 
  
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model =Category
-        fields = 'name product_count'.split()
+        fields = 'id name product_count'.split()
 
 
 class CategoryValidateSerializer(serializers.Serializer):
