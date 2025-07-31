@@ -1,0 +1,22 @@
+version: '2'
+services:
+  shop_backend:
+    build:
+      context: .
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8002:8000" #host:container
+    depends_on:
+      - shop_db
+  shop_db:
+    image: "postgres:14"
+    environment:
+      POSTGRES_DB: 'shop_data'
+      POSTGRES_USER: 'shop_data_user'
+      POSTGRES_PASSWORD: '1234'
+    volumes:
+      - 'shopping_data:/var/lib/postgresql/data'
+volumes:
+  shopping_data:
+
+  #  docker-compose exec shop_backend bash
