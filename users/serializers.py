@@ -1,21 +1,21 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from django.contrib.auth.models import User
+from users.models import CustomUser
 from .models import ConfirmCode
 
 class UserBaseSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
     password = serializers.CharField()
 
 
 
 class UserRegisterSerializer(UserBaseSerializer):
-    def validate_username(self, username):
+    def validate_username(self, email):
         try:
-            User.objects.get('username=username')
-        except:
-            return username
-        raise ValidationError('User already exists!')
+            CustomUser.objects.get('email=email')
+        except CustomUser.DoesNotExist:
+            return email
+        raise ValidationError('Email already exists!')
 
 
 class UserAuthSerializer(UserBaseSerializer):
@@ -23,15 +23,24 @@ class UserAuthSerializer(UserBaseSerializer):
 
 
 class UserConfirmSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
     code = serializers.CharField(max_length=6)
 
-    def validate_code(self, code):
+    def validate(self, attrs):
+        user_id = attrs.get("user_id")
+        code = attrs.get("code")
+
         try:
-            confirm = ConfirmCode.objects.get(code=code)
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError({'user_id': 'User not found.'})
+
+        try:
+            confirm = ConfirmCode.objects.get(code=code, user=user)
         except ConfirmCode.DoesNotExist:
-            raise serializers.ValidationError('Invalid confirmation code!')
-        
-        self.user = confirm.user
+            raise serializers.ValidationError({'code': 'Invalid confirmation code for this user.'})
+
+        self.user = user
         self.confirm_instance = confirm
-        return code
+        return attrs
     

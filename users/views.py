@@ -1,11 +1,10 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from .serializers import UserRegisterSerializer, UserAuthSerializer, UserConfirmSerializer
-from .models import ConfirmCode
+from .models import ConfirmCode, CustomUser
 import random
 
 
@@ -14,16 +13,17 @@ def generate_code():
     return f"{random.randint(0, 999999):06}"
 
 
-class RegistrationAPIView(APIView):
+class RegistrationAPIView(CreateAPIView):
+    serializer_class = UserRegisterSerializer
     def post(self, request):
-        serializer = UserRegisterSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
 
-        user = User.objects.create_user(
-            username=username,
+        user = CustomUser.objects.create_user(
+            email=email,
             password=password,
             is_active=False,
         )
@@ -36,14 +36,17 @@ class RegistrationAPIView(APIView):
         print(f"CODE: {code}")
 
         return Response(
-            data={'user_id': user.id},
+            data={
+                'user_id': user.id,
+                'confirmation_code': code},
             status=status.HTTP_201_CREATED
         )
 
 
-class AuthAPIView(APIView):
+class AuthAPIView(CreateAPIView):
+    serializer_class = UserAuthSerializer
     def post(self, request):
-        serializer = UserAuthSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = authenticate(**serializer.validated_data)
@@ -56,9 +59,10 @@ class AuthAPIView(APIView):
         )
 
 
-class ConfirmationAPIView(APIView):
-    def post(self, request):
-        serializer = UserConfirmSerializer(data=request.data)
+class ConfirmationAPIView(CreateAPIView):
+    serializer_class = UserConfirmSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = serializer.user
@@ -66,4 +70,6 @@ class ConfirmationAPIView(APIView):
         user.save()
 
         serializer.confirm_instance.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(
+            data={'account is successfully activated'},
+            status=status.HTTP_200_OK)
