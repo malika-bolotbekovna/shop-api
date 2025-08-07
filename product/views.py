@@ -1,16 +1,16 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
+from rest_framework.pagination import PageNumberPagination
+from django.http import Http404
+from common.permissions import IsOwner, IsAnonymous, IsStaff
 from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
 from .serializers import CategoryDetailSerializer, ProductDetailSerializer, ReviewDetailSerializer
 from .serializers import ProductReviewSerializer, ProductValidateSerializer, CategoryValidateSerializer, ReviewValidateSerializer
 from .models import Category, Product, Review
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.pagination import PageNumberPagination
-from django.http import Http404
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
-
 
 
 
@@ -97,6 +97,7 @@ class ProductListCreateAPIView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     pagination_class = CustomPagination
+    permission_classes = [IsOwner | IsAnonymous | IsStaff]
 
     
     def post(self, request, *args, **kwargs):
@@ -115,7 +116,8 @@ class ProductListCreateAPIView(ListCreateAPIView):
             title=title,
             description=description,
             price=price,
-            category_id=category_id
+            category_id=category_id,
+            owner=request.user
         )
         product.save()
         return Response(
@@ -128,6 +130,7 @@ class ProductDetailAPIView(ExceptionHandledAPIView, RetrieveUpdateDestroyAPIView
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
     lookup_field = 'id'
+    permission_classes = [IsOwner]
 
     def get_object(self):
         product_id = self.kwargs.get('id')
@@ -155,6 +158,12 @@ class ProductDetailAPIView(ExceptionHandledAPIView, RetrieveUpdateDestroyAPIView
             data=ProductDetailSerializer(product).data
         )
 
+
+class OwnerProductListAPIView(ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        return Product.objects.filter(owner=self.request.user).select_related('category')
 
 
 class ReviewViewSet(ExceptionHandledAPIView, ModelViewSet):
@@ -192,7 +201,6 @@ class ReviewViewSet(ExceptionHandledAPIView, ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         for attr, value in serializer.validated_data.items():
-            # присваивание значений
             setattr(instance, attr, value)
         instance.save()
 

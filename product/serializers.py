@@ -31,7 +31,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model =Product
-        fields = 'id title price category'.split()
+        fields = '__all__'
 
 
 class ProductValidateSerializer(serializers.Serializer):

@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
+from rest_framework import permissions
 from django.contrib.auth import authenticate
 from .serializers import UserRegisterSerializer, UserAuthSerializer, UserConfirmSerializer
 from .models import ConfirmCode, CustomUser

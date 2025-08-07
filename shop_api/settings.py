@@ -44,7 +44,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication'
     ],
-    # 'PAGE_SIZE': 3
+    'PAGE_SIZE': 3
 }
 
 # QUERYCOUNT = {
@@ -120,6 +120,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 AUTH_USER_MODEL = "users.CustomUser"
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Token jvoemgoeiigrmeomveoiibm34m'
+        }
+    }
+}
 
 LANGUAGE_CODE = 'en-us'
 

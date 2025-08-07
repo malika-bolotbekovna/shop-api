@@ -15,6 +15,7 @@ urlpatterns = [
     })),
     path('api/v1/categories/', views.CategoryListCreateAPIView.as_view()),
     path('api/v1/products/', views.ProductListCreateAPIView.as_view()),
+    path('my-products/', views.OwnerProductListAPIView.as_view()),
     path('api/v1/reviews/', views.ReviewViewSet.as_view({
         'get': 'list',
         'post': 'create'
