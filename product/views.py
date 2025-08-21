@@ -7,6 +7,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.pagination import PageNumberPagination
 from django.http import Http404
 from common.permissions import IsOwner, IsAnonymous, IsStaff
+from common.validators import validate_age
 from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
 from .serializers import CategoryDetailSerializer, ProductDetailSerializer, ReviewDetailSerializer
 from .serializers import ProductReviewSerializer, ProductValidateSerializer, CategoryValidateSerializer, ReviewValidateSerializer
@@ -101,6 +102,7 @@ class ProductListCreateAPIView(ListCreateAPIView):
 
     
     def post(self, request, *args, **kwargs):
+        validate_age(request.user.birthday)
         serializer = ProductValidateSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(

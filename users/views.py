@@ -4,8 +4,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
 from rest_framework import permissions
 from django.contrib.auth import authenticate
-from .serializers import UserRegisterSerializer, UserAuthSerializer, UserConfirmSerializer
+from .serializers import UserRegisterSerializer, UserAuthSerializer, UserConfirmSerializer, CustomTokenOptainSerializer
 from .models import ConfirmCode, CustomUser
+from rest_framework_simplejwt.views import TokenObtainPairView
 import random
 
 
@@ -22,10 +23,12 @@ class RegistrationAPIView(CreateAPIView):
 
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
+        birthday = serializer.validated_data.get('birthday')
 
         user = CustomUser.objects.create_user(
             email=email,
             password=password,
+            birthday=birthday,
             is_active=False,
         )
 
@@ -74,3 +77,9 @@ class ConfirmationAPIView(CreateAPIView):
         return Response(
             data={'account is successfully activated'},
             status=status.HTTP_200_OK)
+    
+
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenOptainSerializer

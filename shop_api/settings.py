@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,6 +26,8 @@ INSTALLED_APPS = [
     'users',
     'rest_framework.authtoken',
     'drf_yasg',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 
 ]
 
@@ -36,30 +39,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'querycount.middleware.QueryCountMiddleware',
-
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication'
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'PAGE_SIZE': 3
 }
-
-# QUERYCOUNT = {
-#     'THRESHOLDS': {
-#         'MEDIUM': 50,
-#         'HIGH': 200,
-#         'MIN_TIME_TO_LOG':0,
-#         'MIN_QUERY_COUNT_TO_LOG':0
-#     },
-#     'IGNORE_REQUEST_PATTERNS': [],
-#     'IGNORE_SQL_PATTERNS': [],
-#     'DISPLAY_DUPLICATES': None,
-#     'RESPONSE_HEADER': 'X-DjangoQueryCount-Count',
-#     # 'DISPLAY_DUPLICATES': 10
-# }
 
 
 ROOT_URLCONF = 'shop_api.urls'
@@ -128,8 +116,24 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization',
             'in': 'header',
             'description': 'Token jvoemgoeiigrmeomveoiibm34m'
+        },
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Bearer jvoemgoeiigrmeomveoiibm34m.dfbdgthr.dbthdg'
         }
     }
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+
 }
 
 LANGUAGE_CODE = 'en-us'
