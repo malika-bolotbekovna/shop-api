@@ -6,6 +6,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from django.http import Http404
+from django.core.cache import cache
 from common.permissions import IsOwner, IsAnonymous, IsStaff
 from common.validators import validate_age
 from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
@@ -100,6 +101,19 @@ class ProductListCreateAPIView(ListCreateAPIView):
     pagination_class = CustomPagination
     permission_classes = [IsOwner | IsAnonymous | IsStaff]
 
+    def get(self, request, *args, **kwargs):
+        cashed_data = cache.get("product_list")
+        if cashed_data:
+            print('REDIS IS WORKING')
+            return Response (
+                data=cashed_data,
+                status=status.HTTP_200_OK
+            )
+        response = super().get(request, *args, **kwargs)
+        print('USUAL RESPONSE')
+        if response.data.get("total", 0) > 0:
+            cache.set("product_list", response.data, timeout=120)
+        return response
     
     def post(self, request, *args, **kwargs):
         birthday = request.auth.get("birthday")

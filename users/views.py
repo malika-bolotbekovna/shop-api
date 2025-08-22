@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
 from rest_framework import permissions
 from django.contrib.auth import authenticate
+from django.core.cache import cache
 from .serializers import UserRegisterSerializer, UserAuthSerializer, UserConfirmSerializer, CustomTokenOptainSerializer
 from .models import ConfirmCode, CustomUser
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -33,10 +34,7 @@ class RegistrationAPIView(CreateAPIView):
         )
 
         code = generate_code()
-        ConfirmCode.objects.create(
-            user=user, 
-            code=code
-        )
+        cache.set(f"confirm_code_{user.id}", code, timeout=300)
         print(f"CODE: {code}")
 
         return Response(
@@ -65,6 +63,7 @@ class AuthAPIView(CreateAPIView):
 
 class ConfirmationAPIView(CreateAPIView):
     serializer_class = UserConfirmSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -73,7 +72,8 @@ class ConfirmationAPIView(CreateAPIView):
         user.is_active = True
         user.save()
 
-        serializer.confirm_instance.delete()
+        cache.delete(f"confirm_code_{user.id}")
+
         return Response(
             data={'account is successfully activated'},
             status=status.HTTP_200_OK)

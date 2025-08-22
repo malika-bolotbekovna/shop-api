@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from users.models import CustomUser
 from .models import ConfirmCode
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from django.core.cache import cache
 class UserBaseSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
@@ -30,22 +30,22 @@ class UserConfirmSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         user_id = attrs.get("user_id")
-        code = attrs.get("code")
+        code_entered = attrs.get("code")
 
         try:
             user = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError({'user_id': 'User not found.'})
 
-        try:
-            confirm = ConfirmCode.objects.get(code=code, user=user)
-        except ConfirmCode.DoesNotExist:
+        code_stored = cache.get(f"confirm_code_{user.id}")
+        if code_stored is None:
+            raise serializers.ValidationError({'code': 'Confirmation code expired or does not exist.'})
+
+        if code_stored != code_entered:
             raise serializers.ValidationError({'code': 'Invalid confirmation code for this user.'})
 
         self.user = user
-        self.confirm_instance = confirm
         return attrs
-    
 
 
 
