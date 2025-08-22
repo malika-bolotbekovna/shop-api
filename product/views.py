@@ -102,7 +102,8 @@ class ProductListCreateAPIView(ListCreateAPIView):
 
     
     def post(self, request, *args, **kwargs):
-        validate_age(request.user.birthday)
+        birthday = request.auth.get("birthday")
+        validate_age(birthday)
         serializer = ProductValidateSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
