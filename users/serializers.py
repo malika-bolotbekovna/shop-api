@@ -54,7 +54,7 @@ class CustomTokenOptainSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token["email"] = user.email
-        token["birthday"]= str(user.birthday) if user.birthday else None
+        token["birthday"] = str(user.birthday) if user.birthday else None
         return token
     
 
