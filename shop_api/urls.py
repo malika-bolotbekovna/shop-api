@@ -21,7 +21,7 @@ urlpatterns = [
         'post': 'create'
     })),
     path('api/v1/products/reviews/', views.product_review_api_view),
-
+    path('api/v1/products/send-email/', views.SendProductsEmailAPIView.as_view()),
     path('api/v1/users/', include('users.urls'))
 ]
 

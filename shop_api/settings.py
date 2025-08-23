@@ -5,8 +5,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-
-SECRET_KEY = os.environ.get('SECRET')
+SECRET_KEY = "django-insecure-s+!@cyi7b_7-eag49c6((%-v@jb49&1l7"
+# SECRET_KEY = os.environ.get('SECRET')
 DEBUG = True if os.environ.get('DEBUG') == 'on' else False
 
 ALLOWED_HOSTS = []
@@ -146,6 +146,24 @@ CACHES = {
     }
 }
 
+# CELERY_BROKER_URL = os.environ.get('BROKER_URL')
+# CELERY_RESULT_BACKEND = os.environ.get('CELERY_BACKEND')
+
+# EMAIL_HOST = os.environ.get('HOST_EMAIL')
+# EMAIL_PORT = os.environ.get('PORT_EMAIL')
+# EMAIL_USE_TLS = os.environ.get('TLS')
+# EMAIL_HOST_USER = os.environ.get('USER_EMAIL')
+# EMAIL_HOST_PASSWORD = os.environ.get('PASSWORD_EMAIL')
+
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/6'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/6'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = '587'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('USER_EMAIL')
+EMAIL_HOST_PASSWORD = os.environ.get('PASSWORD_EMAIL')
 
 LANGUAGE_CODE = 'en-us'
 

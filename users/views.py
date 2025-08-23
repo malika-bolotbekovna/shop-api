@@ -2,12 +2,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import permissions
 from django.contrib.auth import authenticate
 from django.core.cache import cache
 from .serializers import UserRegisterSerializer, UserAuthSerializer, UserConfirmSerializer, CustomTokenOptainSerializer
 from .models import ConfirmCode, CustomUser
-from rest_framework_simplejwt.views import TokenObtainPairView
+from users.tasks import send_otp_email, send_discount_reminder
+from datetime import date, timedelta
 import random
 
 
@@ -36,6 +38,8 @@ class RegistrationAPIView(CreateAPIView):
         code = generate_code()
         cache.set(f"confirm_code_{user.id}", code, timeout=300)
         print(f"CODE: {code}")
+
+        send_otp_email.delay(email, code)
 
         return Response(
             data={
@@ -71,6 +75,10 @@ class ConfirmationAPIView(CreateAPIView):
         user = serializer.user
         user.is_active = True
         user.save()
+
+        next_week = date.today() + timedelta(days=7)
+        next_week_str = next_week.strftime("%d.%m.%Y")
+        send_discount_reminder(user.email, next_week_str)
 
         cache.delete(f"confirm_code_{user.id}")
 

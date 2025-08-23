@@ -7,13 +7,13 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.pagination import PageNumberPagination
 from django.http import Http404
 from django.core.cache import cache
-from common.permissions import IsOwner, IsAnonymous, IsStaff
+from common.permissions import IsOwner, IsAnonymous, IsStaff, IsStaffNoPost
 from common.validators import validate_age
 from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
 from .serializers import CategoryDetailSerializer, ProductDetailSerializer, ReviewDetailSerializer
 from .serializers import ProductReviewSerializer, ProductValidateSerializer, CategoryValidateSerializer, ReviewValidateSerializer
 from .models import Category, Product, Review
-
+from product.tasks import all_products
 
 
 
@@ -42,6 +42,18 @@ class CustomPagination(PageNumberPagination):
 
 
 
+
+
+
+class SendProductsEmailAPIView(APIView):
+    permission_classes = [IsStaff]
+
+    def post(self, request):
+        all_products.delay(request.user.email)
+        return Response(
+            {"message": f"Список товаров отправлен на {request.user.email}"},
+            status=status.HTTP_200_OK
+        )
 
 
 class CategoryListCreateAPIView(ListCreateAPIView):
@@ -99,7 +111,7 @@ class ProductListCreateAPIView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     pagination_class = CustomPagination
-    permission_classes = [IsOwner | IsAnonymous | IsStaff]
+    permission_classes = [IsOwner | IsAnonymous | IsStaffNoPost]
 
     def get(self, request, *args, **kwargs):
         cashed_data = cache.get("product_list")
