@@ -1,12 +1,12 @@
 FROM python:3.13.2
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-WORKDIR /hw
+WORKDIR /app
 
-COPY requirements.txt /hw/requirements.txt
+COPY requirements.txt /app/requirements.txt
 
-RUN pip install -r /hw/requirements.txt
+RUN pip install -r /app/requirements.txt
 
 COPY . .
